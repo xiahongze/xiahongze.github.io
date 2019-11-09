@@ -3,6 +3,7 @@ layout: post
 title: My Blog is Up! Finally!
 date:   2019-11-07 10:18:51 +1100
 categories: update
+comments: true
 ---
 
 Welcome to my blog! Hurrah!

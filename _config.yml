@@ -27,14 +27,22 @@ url: "" # the base hostname & protocol for your site, e.g. http://example.com
 github_username: xiahongze
 linkedin_username: hongze-xia-762530112
 
+disqus:
+  shortname: bigzesrandomthoughts
+
+markdown: kramdown
+mathjax: true
+
 # Build settings
 theme: minima
 plugins:
   - jekyll-feed
 
-disqus:
-  shortname: bigzesrandomthoughts
-
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - .jekyll-cache/
 # Exclude from processing.
 # The following items will not be processed, by default.
 # Any item listed under the `exclude:` key here will be automatically added to

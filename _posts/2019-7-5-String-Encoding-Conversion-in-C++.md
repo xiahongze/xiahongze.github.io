@@ -3,6 +3,7 @@ layout: post
 title:  String Encoding and Decoding in C++
 date:   2019-07-05 12:00:00 +1100
 categories: tech c++
+comments: true
 ---
 
 This is an old note written awhile back this year. Hope it would be helpful to people
