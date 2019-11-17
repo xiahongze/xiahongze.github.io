@@ -6,7 +6,7 @@ How to run a local development environment
 - install ruby>=2.4.0
   - for example, on macOS, you could do `brew install ruby`
 - install jekyll, `gem install jekyll bundler`
-- under the repo root, run `bundle exec jekyll serve --force_polling`
+- under the repo root, run `bundle exec jekyll serve --force_polling --watch --drafts`
 
 
 ## open existing gem directory
