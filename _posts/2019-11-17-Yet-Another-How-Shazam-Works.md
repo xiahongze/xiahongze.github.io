@@ -37,9 +37,9 @@ Constellation Map is an invented concept from Wang's paper, quoted
 It is actually just a reduced spectrogram --- only the top frequency
 components at each time step is preserved.
 
-### Footprints
+### Fingerprints
 
-Footprints are signatures of a piece of audio, generated from the combinatorial
+Fingerprints are signatures of a piece of audio, generated from the combinatorial
 hashing of frequencies and time deltas, track ID and start times.
 I will explain this in another section.
 
@@ -66,7 +66,9 @@ Output:
 For more information, one can read the [doc from scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.spectrogram.html).
 
 
-Reducing the Spectrogram along the frequency axis is simple.
+Reducing the Spectrogram along the frequency axis is simple. One candidate
+reduction could be taking the top N frequency components as shown below.
+However, one is free to choose his own reduction function.
 
 $$
 \operatorname{ConstellationMap}(t) =
@@ -85,7 +87,7 @@ Output:
 - Constellation Map, $$\operatorname{ConstellationMap}(t)$$
 - shape: (time, N)
 
-## Footprint Generation
+## Fingerprint Generation
 
 ### Combinatorial Hashing
 
@@ -93,7 +95,7 @@ According to Wang's paper, a pair of frequency-time is used to generate a hash.
 Relative time is used instead of absolute timestamps given by the frequency-time
 pair. Hence, three numbers, namely $$f_0$$, $$f_1$$ and
 $$\delta t=t_1 - t_0$$
-are combinatorially hashed to generate a hash.
+are used to generate a hash.
 
 If $$\mathcal{H}$$ is the hash function and $$h_i$$ and $$n_i$$ is the hash and
 the number at step i, the combinatorial hashing can be written as
@@ -109,6 +111,9 @@ def H(hfunc: Callable, numbers: List[int]) -> int:
         r = hfunc(r, n)
     return r
 ```
+
+An alternative to this hashing approach could be stitching the three numbers in
+a string and use that string to generate a hash.
 
 The reason for using frequency-time pairs instead of one single frequency-time
 point is that this greatly improves the specificity. Quotes from the paper,
