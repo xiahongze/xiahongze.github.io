@@ -30,7 +30,23 @@ Test scene: 1200 x 800 pixels, 100 samples per pixel, 50 bounces, random spheres
 
 1. Pure CPU code from Peter Shirley's book ~ around 10 min or more on single core
 2. Unoptimized CUDA code from Roger Allen's code ~ around 15s on GPU
-3. Optimized CUDA code (still brute force) ~ around 6s on GPU
+3. Optimized CUDA code (brute force) ~ around 6s on GPU
 4. Optimized CUDA code with BVH tree ~ around 0.5s on GPU
 
 As can be seen and unsurprisingly, GPU is much faster than CPU and BVH tree is much faster than brute force method.
+
+## CUDA
+
+There are a few learnings I would like to share about using CUDA.
+
+1. Memory access patterns matter. Choose the right grid/block/thread size matters. But do not over optimize.
+2. Prefer `cudaMalloc` over dynamic memory allocation in CUDA. It is much faster.
+3. In my experience, there is no gain to parallelize samples over the pixels. Just parallelize over the rays.
+4. Compile each `.cu` file into a `.o` file and then link them together. This results in much faster code than compiling everything in header files.
+   I understand that Mr Roger Allen uses only header files because he wants to make it easier for readers to understand the code & logic but not the
+   mechanics of C++. This might be due to the extensive use of inlining among other things. It definitely works better for me to use
+   separate `.h` and `.cu` file with a proper `Makefile` to compile and link them all.
+
+## Final Words
+
+It has been a very interesting journey and I have learnt a lot. All of my code will be made public once I have finished implementing the second final scene from Peter Shirley's book. In the meantime, please feel free to leave a message if you have any questions or suggestions. I am more than happy to discuss with you.
