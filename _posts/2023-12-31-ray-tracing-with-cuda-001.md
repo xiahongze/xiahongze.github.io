@@ -26,38 +26,30 @@ When it comes to executing a single task, CPUs often outpace GPUs. However, GPUs
 
 ## Ray Tracing
 
-Ray tracing is one of such tasks, as each ray shooting from the camera can be calculated independently and there is going to be hundreds of thousands of rays for a typical scene. It is based on the idea that we can trace the path of light and simulate the way light interacts with the objects in the scene. The basic idea is that we shoot a ray from the camera and see if it hits any objects in the scene. If it does, we calculate the color of the object at the intersection point and then shoot another ray from the intersection point to see if it hits any other objects. We repeat this process until we hit the light source or we reach the maximum number of bounces. The color of the pixel is the color of the light source if we hit the light source or the background color if we don't hit anything. Check out `rasterization` and `ray tracing` [here](https://en.wikipedia.org/wiki/Rasterisation) and [here](<https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>) for more details.
+Ray tracing, a marvel of computer graphics, operates on a fascinating principle: each ray emanating from the camera navigates the scene independently, potentially numbering in the hundreds of thousands for a typical setup. The core concept is simple yet profound - tracing light's journey and simulating its interactions with objects. Imagine a ray projected from the camera, exploring the scene for object encounters. Upon impact, it assesses the object's color at the point of contact, then launches a new ray from there to further probe the environment. This iterative process continues until the ray either illuminates from a light source or exhausts its maximum bounce limit. The pixel's hue then reflects either the light source's color or, in the absence of a hit, the background's. For a deeper dive into this technique, as well as its counterpart 'rasterization', the Wikipedia pages on [rasterization](https://en.wikipedia.org/wiki/Rasterisation) and [ray tracing](<https://en.wikipedia.org/wiki/Ray_tracing_(graphics)>) offer comprehensive insights.
 
-To compute the interaction between ray and objects, we can naively iterate through all objects in a scene and check if the ray hits any of them. This is called `brute force` method and it is very slow and that is the method implemented in the first series of Peter Shirley's posts. To speed up the process, we can use a data structure called `Bounding Volume Hierarchy (BVH)` tree. The basic idea is that we divide the scene into smaller and smaller boxes and we can quickly determine if a ray hits a box. If it does, we can then check the objects in the box to see if the ray hits any of them. If it doesn't, we can discard the box and move on to the next box. Check out [here](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy) for more details. You can think about this as a binary search algorithm built specifically for ray tracing. This is the method implemented in the second series of Peter Shirley's posts.
+The interaction between rays and objects can initially follow a 'brute force' approach - a thorough but sluggish method of scanning every object, as showcased in Peter Shirley's first series. The alternative, a Bounding Volume Hierarchy (BVH) tree, introduces efficiency, introduced in the second embarkment. By segmenting the scene into smaller boxes, this method rapidly assesses potential ray interactions, examining objects within a hit box and bypassing empty ones. This approach resembles a binary search algorithm tailored for ray tracing, and is detailed in Shirley's second series. Dive into the specifics of BVH trees [here](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy).
 
-It makes a lot of sense to use BVH tree to eliminate unnecessary computations. However, trees are not very friendly to GPUs because of the memory access pattern. Recursion is something GPU does not quite like. Hence, direct translation of Peter's code into CUDA does not lead to efficient computation and I need to improve on that. Luckily, it turns out we can flatten the tree structure and make it more GPU friendly. This is called `linearization` of BVH tree and it is a crucial optimization technique. The way that this is done in my code is to first build the tree in the CPU and then flatten it into a linear array. This array is then copied to the GPU and used for ray tracing. It works very well and I am very happy with the performance. To give you some idea, here is progress so far:
+Implementing BVH trees on GPUs, however, poses challenges due to their recursive and memory-intensive nature. To enhance efficiency in my CUDA adaptations, I transformed the tree structure into a linear array. This 'linearization' process involves constructing the tree on the CPU, then flattening it for GPU usage, yielding significant performance improvements. To illustrate the impact of these optimizations on my setup (AMD5800X, RTX3080, 32GB RAM), here's a comparison using a test scene (1200x800 pixels, 488 random spheres, 100 samples per pixel, 50 max bounce limit):
 
-My machine: AMD5800X + RTX3080 + 32GB RAM
+1. Pure CPU (brute force): ~4min40s (single core; extrapolated from 10 to 100 samples per pixel)
+2. Unoptimized CUDA: ~15s (GPU)
+3. Optimized CUDA (brute force): ~6s (GPU)
+4. Optimized CUDA with BVH tree: ~0.5s (GPU)
 
-Test scene: 1200 x 800 pixels, 100 samples per pixel, 50 bounces, random spheres (488 objects)
-
-1. Pure CPU code (brute force) from Peter Shirley's book ~ around 4min40s on single core. _I actually did not sample 100 rays per pixel. Instead, I used 10 per pixel and
-   it took around 28.2s on single core. Hence, I estimated that it would take around 282s for 100 samples per pixel._
-2. Unoptimized CUDA code from Roger Allen's code ~ around 15s on GPU
-3. Optimized CUDA code (brute force) ~ around 6s on GPU
-4. Optimized CUDA code with BVH tree ~ around 0.5s on GPU
-
-As can be seen and unsurprisingly, GPU is much faster than CPU and BVH tree is much faster than brute force method.
+Clearly, GPUs outperform CPUs, and the BVH tree method significantly trumps the brute force approach in speed.
 
 ![Random Sphere with Defocus Effect](/assets/img/random-spheres.jpg)
 
-## CUDA
+### CUDA Insights
 
-There are a few learnings I would like to share about using CUDA.
+My exploration with CUDA has yielded some valuable insights I'd like to share:
 
-1. Memory access patterns matter. Choose the right grid/block/thread size matters. But do not over optimize.
-2. Prefer `cudaMalloc` over dynamic memory allocation in CUDA. It is much faster.
-3. In my experience, there is no gain to parallelize samples over the pixels. Just parallelize over the rays.
-4. Compile each `.cu` file into a `.o` file and then link them together. This results in much faster code than compiling everything in header files.
-   I understand that Mr Roger Allen uses only header files because he wants to make it easier for readers to understand the code & logic but not the
-   mechanics of C++. This might be due to the extensive use of inlining among other things. It definitely works better for me to use
-   separate `.h` and `.cu` file with a proper `Makefile` to compile and link them all.
+1. **Memory Access and Optimization:** The choice of grid, block, and thread sizes in CUDA is crucial, as memory access patterns significantly impact performance. However, it's important to find a balance and avoid excessive optimization.
+2. **Memory Allocation:** Opt for `cudaMalloc` instead of dynamic memory allocation. In my experience, `cudaMalloc` is noticeably faster.
+3. **Parallelization Strategy:** Parallelizing over rays, rather than over pixels or samples, has proven more effective. This approach aligns better with CUDA's architecture.
+4. **Code Compilation:** Compiling each `.cu` file into a `.o` file and then linking them yields faster code. While Roger Allen prefers header files for simplicity and clarity, I've found that separating `.h` and `.cu` files and using a `Makefile` for compilation and linking enhances performance.
 
-## Final Words
+### Final Thoughts
 
-It has been a very interesting journey and I have learnt a lot. All of my code will be made public once I have finished implementing the second final scene from Peter Shirley's book. In the meantime, please feel free to leave a message if you have any questions or suggestions. I am more than happy to discuss with you.
+This journey through CUDA and ray tracing has been incredibly enriching. I've not only learned a great deal but also enjoyed every step. Once I complete the implementation of the final scene from Peter Shirley's second book, I plan to release all my code to the public. In the meantime, I welcome any questions or suggestions. Engaging in discussions and sharing knowledge with fellow enthusiasts is something I always look forward to.
