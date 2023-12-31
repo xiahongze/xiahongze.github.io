@@ -6,7 +6,7 @@ categories: tech c++ cuda raytracing
 comments: true
 ---
 
-# Ray Tracing with CUDA (001)
+# Ray Tracing with CUDA (101)
 
 My journey into the realm of parallel programming has been a thrilling one, fueled by years of fascination and a drive to harness the power of multi-core CPUs in my everyday work. This passion took root during my PhD research, where I delved into High Performance Computing (HPC) and experimented with MPI, stretching calculations across multi-node clusters. As a professional software developer and an avid PyTorch user, I've come to appreciate how PyTorch leverages GPU capabilities and efficiently utilizes all available computer cores. However, this convenience comes with a level of abstraction that leaves me yearning for a deeper understanding of the underlying mechanisms.
 
