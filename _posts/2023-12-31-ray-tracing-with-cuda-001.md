@@ -28,8 +28,8 @@ My machine: AMD5800X + RTX3080 + 32GB RAM
 
 Test scene: 1200 x 800 pixels, 100 samples per pixel, 50 bounces, random spheres (488 objects)
 
-1. Pure CPU code (brute force) from Peter Shirley's book ~ around 70 min or more on single core. _I actually did not sample 100 rays per pixel because it would take too long. Instead, I used 10 per pixel and
-   it took around 7 min on single core. Hence, I estimated that it would take around 70 min for 100 samples per pixel._
+1. Pure CPU code (brute force) from Peter Shirley's book ~ around 4min40s on single core. _I actually did not sample 100 rays per pixel. Instead, I used 10 per pixel and
+   it took around 28.2s on single core. Hence, I estimated that it would take around 282s for 100 samples per pixel._
 2. Unoptimized CUDA code from Roger Allen's code ~ around 15s on GPU
 3. Optimized CUDA code (brute force) ~ around 6s on GPU
 4. Optimized CUDA code with BVH tree ~ around 0.5s on GPU
