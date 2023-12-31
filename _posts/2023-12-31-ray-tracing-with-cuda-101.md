@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Ray Tracing wih CUDA 001
+title: Ray Tracing wih CUDA 101
 date: 2023-12-31 12:00:00 +1100
 categories: tech c++ cuda raytracing
 comments: true
