@@ -174,6 +174,6 @@ It has been a fantastic journey reading and implementing Peter Shirley's ray tra
 - build BVH tree directly in device and avoid transfering back and forth between host and device
 - explore nested BVH tree and see if it can improve performance
 - implement triangle mesh
-- learn optx
+- learn optix
 
 I hope you have enjoyed reading this series as much as I have enjoyed writing it. I will be taking a break from ray tracing and will be focusing on other topics. Until then, happy ray tracing!
