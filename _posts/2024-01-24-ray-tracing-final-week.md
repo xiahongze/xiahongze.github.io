@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Ray Tracing the Final Week
-date: 2024-01-14 12:00:00 +1100
+date: 2024-01-24 12:00:00 +1100
 categories: tech c++ cuda raytracing
 comments: true
 ---
